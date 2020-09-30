@@ -25,6 +25,7 @@ def is_bot_owner():
     else:
       ctx.send(f'You aren\'t allowed to use this command, {ctx.author.mention}! This is only for the bot owner!')
       return False
+  # So we can actually use it as a check
   return commands.check(predicate)
 
 # def is_impostor():
@@ -49,6 +50,8 @@ class Owner(commands.Cog, name='Owner', command_attrs=dict(hidden=True)):
   def __init__(self, bot):
     self.bot = bot
   
+  # Refreshes prefixes
+  # (allows direct editing of prefixes through the JSON file, even while running)
   @commands.command(name='prefresh', aliases=['pr'])
   @is_bot_owner()
   async def prefresh(self, ctx):
@@ -57,7 +60,8 @@ class Owner(commands.Cog, name='Owner', command_attrs=dict(hidden=True)):
       bot_prefixes = json.load(prefix_file)
     
     await ctx.send('Done refreshing prefixes!')
-
+  
+  # Shuts down the bot
   @commands.command(name='shutdown', aliases=['fuckoff', 'begone', 'gtfo', 'bye', 'killbot'])
   @is_bot_owner()
   async def shutdown(self, ctx):
@@ -73,27 +77,32 @@ class Game(commands.Cog, name='Game'):
   '''
   def __init__(self, bot):
     self.bot = bot
-
+    
+    # Load tasks
     with open('tasks.json') as taskfile:
       self.tasks = json.load(taskfile)
-
+    
+    # Print tasks to the terminal so we can verify their validity
     print('\nTasks')
     for _map, map_vals in self.tasks.items():
-      print(_map)
+      print('  '+_map)
       for category, _task_list in map_vals.items():
-        print('  '+category)
+        print('    '+category)
         for _task in _task_list.keys():
-          print('    '+_task)
+          print('      '+_task)
+    print('')
   
+  # Task commands
   @commands.group(name='task', aliases=['tasks', 't'])
-  # Insert "is in game" check? Or should be internal?
   async def task(self, ctx):
     '''
     Task-related commands.
     '''
     if ctx.invoked_subcommand is None:
-      await ctx.invoke(help, 'task')
-  
+      help = self.bot.help_command
+      help.context = ctx
+      await help.send_group_help(self.bot.get_command('task'))
+    
   @task.command(name='list', aliases=['l'])
   async def task_list(self, ctx):
     '''
@@ -110,6 +119,9 @@ class Game(commands.Cog, name='Game'):
     
     result += '\n```'
     await ctx.send(result)
+  
+  # TODO: insert more task commands and "is in game" checks where
+  # necessary to make certain task commands only work at certain times
 
 class Management(commands.Cog, name='Management'):
   '''
@@ -118,12 +130,14 @@ class Management(commands.Cog, name='Management'):
   def __init__(self, bot):
     self.bot = bot
   
+  # Prefix command group system
   @commands.group(name='prefix', aliases=['pre', 'p'])
   async def prefix(self, ctx):
     '''
     Various prefix commands!
     If run without a subcommand, sends the prefixes you can use here.
     '''
+    # Get usable prefixes if no subcommand
     if ctx.invoked_subcommand is None:
       guild = ctx.message.guild
       prefix_results = []
@@ -208,10 +222,13 @@ class Miscellaneous(commands.Cog, name='Miscellaneous'):
   '''
   def __init__(self, bot):
     self.bot = bot
+    
+    # Add "help" to the Miscellaneous cog
     help = self.bot.remove_command('help')
     help.cog = self
     self.bot.add_command(help)
-
+  
+  # Invite command so people can invite the bot
   @commands.command(name='invite', aliases=['inv', 'i'])
   async def invite(self, ctx):
     '''
@@ -224,10 +241,12 @@ if not os.path.exists('prefixes.json'):
   with open('prefixes.json', 'w') as prefix_file:
     json.dump({'global': 'a!', 'guild': {}, 'user': {}}, prefix_file)
 
+# Load prefixes
 with open('prefixes.json', 'r') as prefix_file:
   bot_prefixes = json.load(prefix_file)
   print(bot_prefixes)
 
+# Gets possible prefixes to use
 async def prefix_callable(bot, message):
   guild = message.guild
   prefix_results = []
@@ -246,6 +265,7 @@ async def prefix_callable(bot, message):
   
   return commands.when_mentioned_or(*prefix_results)(bot, message)
 
+# Initiate bot
 bot = commands.Bot(command_prefix=prefix_callable)
 
 # Custom exceptions for error definitions
@@ -270,9 +290,12 @@ async def on_command_error(ctx, exception):
     await ctx.send(f'```\n{exception}\n```')
     print(exception)
 
+
+# Load cogs
 bot.add_cog(Owner(bot))
 bot.add_cog(Game(bot))
 bot.add_cog(Management(bot))
 bot.add_cog(Miscellaneous(bot))
 
+# Run the bot
 bot.run("Lmao you don't get the token that easy xD")
