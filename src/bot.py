@@ -173,10 +173,8 @@ class Management(commands.Cog, name='Management'):
     else:
       bot_prefixes['guild'][str(_id)] = prefix
 
-    with open('/content/prefixes.json', 'w') as prefix_file:
+    with open('prefixes.json', 'w') as prefix_file:
       json.dump(bot_prefixes, prefix_file)
-    
-    shutil.copy2('/content/prefixes.json', '/content/drive/My Drive/bot_files/among_us_bot/prefixes.json')
 
   @prefix.command(name='user', aliases=['u'])
   async def user_prefix(self, ctx, prefix=None):
@@ -199,11 +197,9 @@ class Management(commands.Cog, name='Management'):
       else:
         bot_prefixes['user'][str(ctx.message.author.id)] = prefix
 
-      with open('/content/prefixes.json', 'w') as prefix_file:
+      with open('prefixes.json', 'w') as prefix_file:
         json.dump(bot_prefixes, prefix_file)
       
-      shutil.copy2('/content/prefixes.json', '/content/drive/My Drive/bot_files/among_us_bot/prefixes.json')
-
       await ctx.send('Done! Your custom prefix {}.'.format(f'is now {prefix}' if prefix.lower() != 'none' else 'has been unset'))
 
 class Miscellaneous(commands.Cog, name='Miscellaneous'):
@@ -224,11 +220,11 @@ class Miscellaneous(commands.Cog, name='Miscellaneous'):
     await ctx.send('Invite me!\nhttps://discord.com/api/oauth2/authorize?client_id=760487866928594974&permissions=268438544&scope=bot')
 
 # Code to run at startup
-if not os.path.exists('/content/prefixes.json'):
-  with open('/content/prefixes.json', 'w') as prefix_file:
+if not os.path.exists('prefixes.json'):
+  with open('prefixes.json', 'w') as prefix_file:
     json.dump({'global': 'a!', 'guild': {}, 'user': {}}, prefix_file)
 
-with open('/content/prefixes.json', 'r') as prefix_file:
+with open('prefixes.json', 'r') as prefix_file:
   bot_prefixes = json.load(prefix_file)
   print(bot_prefixes)
 
