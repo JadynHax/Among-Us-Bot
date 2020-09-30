@@ -16,6 +16,8 @@
 
 import discord, secrets, json, os, shutil
 from discord.ext import commands
+from discord.ext import tasks as disctasks
+from datetime import datetime, timedelta
 
 # Custom command checks
 def is_bot_owner():
@@ -25,7 +27,6 @@ def is_bot_owner():
     else:
       ctx.send(f'You aren\'t allowed to use this command, {ctx.author.mention}! This is only for the bot owner!')
       return False
-  # So we can actually use it as a check
   return commands.check(predicate)
 
 # def is_impostor():
@@ -50,8 +51,6 @@ class Owner(commands.Cog, name='Owner', command_attrs=dict(hidden=True)):
   def __init__(self, bot):
     self.bot = bot
   
-  # Refreshes prefixes
-  # (allows direct editing of prefixes through the JSON file, even while running)
   @commands.command(name='prefresh', aliases=['pr'])
   @is_bot_owner()
   async def prefresh(self, ctx):
@@ -60,8 +59,7 @@ class Owner(commands.Cog, name='Owner', command_attrs=dict(hidden=True)):
       bot_prefixes = json.load(prefix_file)
     
     await ctx.send('Done refreshing prefixes!')
-  
-  # Shuts down the bot
+
   @commands.command(name='shutdown', aliases=['fuckoff', 'begone', 'gtfo', 'bye', 'killbot'])
   @is_bot_owner()
   async def shutdown(self, ctx):
@@ -75,14 +73,15 @@ class Game(commands.Cog, name='Game'):
   '''
   Commands for the Among Us-like Discord game!
   '''
-  def __init__(self, bot):
+  def __init__(self, bot, bot_prefixes):
+    self.games = {}
     self.bot = bot
-    
-    # Load tasks
+    self.bot_prefixes = bot_prefixes
+    self.help = bot.help_command
+
     with open('tasks.json') as taskfile:
       self.tasks = json.load(taskfile)
-    
-    # Print tasks to the terminal so we can verify their validity
+
     print('\nTasks')
     for _map, map_vals in self.tasks.items():
       print('  '+_map)
@@ -90,20 +89,135 @@ class Game(commands.Cog, name='Game'):
         print('    '+category)
         for _task in _task_list.keys():
           print('      '+_task)
-    print('')
+          
+  @commands.group(name='game', aliases=['g'])
+  @commands.guild_only()
+  async def game(self, ctx):
+    '''
+    Game configuration and startup commands.
+    '''
+    if ctx.invoked_subcommand is None:
+      self.help.context = ctx
+      self.help.send_command_help('game')
   
-  # Task commands
+  @game.command(name='prep', aliases=['prepare', 'p'])
+  async def prepare(self, ctx):
+    '''
+    Prepare a game lobby that others in the server can join!
+    '''
+    if not ctx.guild.id in self.games.keys():
+      guild = ctx.message.guild
+      if guild:
+        if str(guild.id) in self.bot_prefixes['guild'].keys():
+          prefix = self.bot_prefixes['guild'][str(guild.id)]
+        
+        else:
+          prefix = self.bot_prefixes['global']
+      message = await ctx.send(f'**{ctx.author.name}** has started an Among Us Bot lobby! Type the command `{prefix}game join` to join!\nThere is currently **1** player in the lobby.')
+      self.games[ctx.guild.id] = {
+          'lobby_message': message,
+          'host': ctx.author,
+          'active_at': datetime.today(),
+          'num_players': 1,
+          'num_impostors': 2,
+          'walk_cooldown': 5,
+          'lights_perm_edit': False,
+          'tasks': {'long': 1, 'short': 2, 'common': 1},
+          'player_ids': [ctx.author.id],
+          'full_context': ctx
+      }
+    else:
+      await ctx.send('Sorry! There\'s already a lobby running in your server! As of right now, this bot is incapable of handling more than one game per server.')
+
+  @game.command(name='join', aliases=['j'])
+  async def game_join(self, ctx):
+    '''
+    Join a game lobby!
+    Only works if there's a lobby running on your server.
+    '''
+    if ctx.guild.id in self.games.keys():
+      _game = self.games[ctx.guild.id]
+
+      if ctx.author.id not in _game['player_ids']:
+        _game['player_ids'].append(ctx.author.id)
+        _game['num_players'] += 1
+        guild = ctx.message.guild
+        if guild:
+          if str(guild.id) in self.bot_prefixes['guild'].keys():
+            prefix = self.bot_prefixes['guild'][str(guild.id)]
+          
+          else:
+            prefix = self.bot_prefixes['global']
+
+        await _game['lobby_message'].edit(content='**{0.author.name}** has started an Among Us Bot lobby! Type the command `{prefix}game join` to join!\nThere {1} currently **{2}** {3} in the lobby.'.format(_game['full_context'], 'is' if _game['num_players'] == 1 else 'are', _game['num_players'], 'player' if _game['num_players'] == 1 else 'players', prefix=prefix))
+
+        self.games[ctx.guild.id] = _game
+
+      else:
+        await ctx.send('You\'re already in this lobby!')
+    
+    else:
+      await ctx.send('No lobby running in this server! Maybe the one you were trying to join expired?')
+
+  @game.command(name='leave', aliases=['l'])
+  async def game_leave(self, ctx):
+    '''
+    Leave a game lobby!
+    Only works if there's a lobby running on your server.
+    '''
+    if ctx.guild.id in self.games.keys():
+      _game = self.games[ctx.guild.id]
+
+      if ctx.author.id in _game['player_ids']:
+        if ctx.author != _game['host']:
+          _game['player_ids'].remove(ctx.author.id)
+          _game['num_players'] -= 1
+          guild = ctx.message.guild
+          if guild:
+            if str(guild.id) in self.bot_prefixes['guild'].keys():
+              prefix = self.bot_prefixes['guild'][str(guild.id)]
+            
+            else:
+              prefix = self.bot_prefixes['global']
+
+          await _game['lobby_message'].edit(content='**{0.author.name}** has started an Among Us Bot lobby! Type the command `{prefix}game join` to join!\nThere {1} currently **{2}** {3} in the lobby.'.format(_game['full_context'], 'is' if _game['num_players'] == 1 else 'are', _game['num_players'], 'player' if _game['num_players'] == 1 else 'players', prefix=prefix))
+
+          self.games[ctx.guild.id] = _game
+
+        else:
+          guild = ctx.message.guild
+          if guild:
+            if str(guild.id) in self.bot_prefixes['guild'].keys():
+              prefix = self.bot_prefixes['guild'][str(guild.id)]
+            
+            else:
+              prefix = self.bot_prefixes['global']
+          await _game['lobby_message'].edit(content=f'**{ctx.author.name}** closed their lobby! Type the command `{prefix}game prep` to make a new one.')
+
+          self.games.pop(ctx.guild.id)
+
+      else:
+        await ctx.send('You\'re already not in this lobby!')
+
+    else:
+      await ctx.send('No lobby running in this server! Maybe the one you were trying to leave expired?')
+
+  @game.command(name='config', aliases=['configure', 'c'], hidden=True)
+  async def configure(self, ctx):
+    # TODO: Add game configuration options
+    pass
+
   @commands.group(name='task', aliases=['tasks', 't'])
+  # Insert "is in game" check? Or should be internal?
   async def task(self, ctx):
     '''
     Task-related commands.
     '''
     if ctx.invoked_subcommand is None:
-      help = self.bot.help_command
-      help.context = ctx
-      await help.send_group_help(self.bot.get_command('task'))
-    
-  @task.command(name='list', aliases=['l'])
+      self.help.context = ctx
+      self.help.send_command_help('game')
+  
+  @task.command(name='listall', aliases=['la'])
   async def task_list(self, ctx):
     '''
     Lists all tasks from all maps.
@@ -119,9 +233,6 @@ class Game(commands.Cog, name='Game'):
     
     result += '\n```'
     await ctx.send(result)
-  
-  # TODO: insert more task commands and "is in game" checks where
-  # necessary to make certain task commands only work at certain times
 
 class Management(commands.Cog, name='Management'):
   '''
@@ -130,14 +241,12 @@ class Management(commands.Cog, name='Management'):
   def __init__(self, bot):
     self.bot = bot
   
-  # Prefix command group system
   @commands.group(name='prefix', aliases=['pre', 'p'])
   async def prefix(self, ctx):
     '''
     Various prefix commands!
     If run without a subcommand, sends the prefixes you can use here.
     '''
-    # Get usable prefixes if no subcommand
     if ctx.invoked_subcommand is None:
       guild = ctx.message.guild
       prefix_results = []
@@ -187,8 +296,10 @@ class Management(commands.Cog, name='Management'):
     else:
       bot_prefixes['guild'][str(_id)] = prefix
 
-    with open('prefixes.json', 'w') as prefix_file:
+    with open('/content/prefixes.json', 'w') as prefix_file:
       json.dump(bot_prefixes, prefix_file)
+    
+    shutil.copy2('/content/prefixes.json', '/content/drive/My Drive/bot_files/among_us_bot/prefixes.json')
 
   @prefix.command(name='user', aliases=['u'])
   async def user_prefix(self, ctx, prefix=None):
@@ -211,9 +322,11 @@ class Management(commands.Cog, name='Management'):
       else:
         bot_prefixes['user'][str(ctx.message.author.id)] = prefix
 
-      with open('prefixes.json', 'w') as prefix_file:
+      with open('/content/prefixes.json', 'w') as prefix_file:
         json.dump(bot_prefixes, prefix_file)
       
+      shutil.copy2('/content/prefixes.json', '/content/drive/My Drive/bot_files/among_us_bot/prefixes.json')
+
       await ctx.send('Done! Your custom prefix {}.'.format(f'is now {prefix}' if prefix.lower() != 'none' else 'has been unset'))
 
 class Miscellaneous(commands.Cog, name='Miscellaneous'):
@@ -222,13 +335,10 @@ class Miscellaneous(commands.Cog, name='Miscellaneous'):
   '''
   def __init__(self, bot):
     self.bot = bot
-    
-    # Add "help" to the Miscellaneous cog
     help = self.bot.remove_command('help')
     help.cog = self
     self.bot.add_command(help)
-  
-  # Invite command so people can invite the bot
+
   @commands.command(name='invite', aliases=['inv', 'i'])
   async def invite(self, ctx):
     '''
