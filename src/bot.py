@@ -403,7 +403,7 @@ async def on_command_error(ctx, exception):
 
 # Load cogs
 bot.add_cog(Owner(bot))
-bot.add_cog(Game(bot))
+bot.add_cog(Game(bot, bot_prefixes))
 bot.add_cog(Management(bot))
 bot.add_cog(Miscellaneous(bot))
 
