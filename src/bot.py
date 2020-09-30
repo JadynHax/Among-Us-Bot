@@ -279,4 +279,4 @@ bot.add_cog(Game(bot))
 bot.add_cog(Management(bot))
 bot.add_cog(Miscellaneous(bot))
 
-bot.run('NzYwNDg3ODY2OTI4NTk0OTc0.X3MxhA.1jS7Ryoek7I2hAN7tWe0f6eCVlg')
+bot.run("Lmao you don't get the token that easy xD")
