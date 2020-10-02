@@ -9,6 +9,7 @@ on:
 
 jobs:
   build:
+    name: Test Bot Code Validity
 
     runs-on: ubuntu-latest
 
@@ -25,8 +26,8 @@ jobs:
         cd libyaml
         ./bootstrap
         ./configure
-        make
-        make install
+        sudo make
+        sudo make install
         cd ..
         7z x PyYAML-5.3.1.tar.gz -y -o.
         7z x dist/PyYAML-5.3.1.tar -y -o.
