@@ -28,12 +28,12 @@ jobs:
         ./configure
         sudo make
         sudo make install
-        cd ..
-        7z x PyYAML-5.3.1.tar.gz -y -o.
-        7z x dist/PyYAML-5.3.1.tar -y -o.
+        cd /home/runner/work/Among-Us-Bot/Among-Us-Bot/
+        gzip -d PyYAML-5.3.1.tar.gz
+        ls -a
         cd PyYAML-5.3.1
         python setup.py --with-libyaml install
-        cd ..
+        cd /home/runner/work/Among-Us-Bot/Among-Us-Bot/
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
