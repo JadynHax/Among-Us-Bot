@@ -19,7 +19,7 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.6
-    - name: Download PyYAML files and dependencies
+    - name: Download and install LibYAML
       run: |
         sudo apt-get install autoconf libtool make
         git clone https://github.com/yaml/libyaml
@@ -28,11 +28,13 @@ jobs:
         ./configure
         sudo make
         sudo make install
-    - name: Install PyYAML
+    - name: Download and install PyYAML
       run: |
         wget http://pyyaml.org/download/pyyaml/PyYAML-5.3.1.tar.gz
         gzip -d PyYAML-5.3.1.tar.gz
-        ls -a
+        tar -xf PyYAML-5.3.1.tar
+        cd PyYAML-5.3.1
+        python setup.py --with-libyaml install
     - name: Install other dependencies
       run: |
         python -m pip install --upgrade pip
