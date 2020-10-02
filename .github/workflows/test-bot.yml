@@ -28,10 +28,12 @@ jobs:
         ./configure
         sudo make
         sudo make install
+        cd ..
+        ls -a
     - name: Install PyYAML
       run: |
-        gzip -d PyYAML-5.3.1.tar.gz
         ls -a
+        gzip -d PyYAML-5.3.1.tar.gz
         cd PyYAML-5.3.1
         python setup.py --with-libyaml install
     - name: Install other dependencies
