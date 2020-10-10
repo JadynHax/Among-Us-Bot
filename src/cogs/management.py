@@ -1,4 +1,4 @@
-"""
+'''
     Among Us Discord Bot - Management cog file.
     Copyright (C) 2020  Jason Rutz
 
@@ -14,9 +14,9 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-"""
+'''
 
-import discord
+import discord, shutil
 from discord.ext import commands
 from utils import dump_yaml
 
@@ -135,6 +135,5 @@ class Management(commands.Cog, name="Management", command_attrs=dict(case_insens
     async def ignore_channels(self, ctx, channel: discord.TextChannel):
         pass
 
-
 def setup(bot):
-    bot.add_cog(Management(bot))
+  bot.add_cog(Management(bot))
