@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import discord, os
+import discord, os, copy
 from typing import Union
 from discord.ext import commands
 from utils import load_yaml

@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import discord, secrets
+import discord, secrets, asyncio
 from discord.ext import commands
 from checks import is_bot_owner
 

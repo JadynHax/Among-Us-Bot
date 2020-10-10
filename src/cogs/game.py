@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import discord
+import discord, asyncio
 from datetime import datetime, timedelta
 from discord.ext import commands
 from discord.ext import tasks as disc_tasks
@@ -24,20 +24,24 @@ from typing import Union
 from utils import load_yaml, dump_yaml, get_guild_pre
 
 
+# Game running check constructor
+
+
+def is_game_running(bot):
+    def predicate(ctx):
+        games = bot.get_cog("Game").games
+        if ctx.guild.id not in games.keys():
+            raise commands.CheckFailure("There isn't a game running in this server!")
+        return True
+
+    return commands.check(predicate)
+
+
 # Command cog
 
 
 class Game(commands.Cog, name="Game", command_attrs=dict(case_insensitive=True)):
     "Commands for the Among Us Bot's Discord game!"
-
-    def is_game_running():
-        def predicate(ctx):
-            games = self.bot.get_cog("Game").games
-            if ctx.guild.id not in games.keys():
-                raise commands.CheckFailure("There isn't a game running in this server!")
-            return True
-
-        return commands.check(predicate)
 
     def __init__(self, bot):
         self.games = {}
@@ -118,10 +122,11 @@ class Game(commands.Cog, name="Game", command_attrs=dict(case_insensitive=True))
 
     @game.command(name="join", aliases=["j"])
     @commands.guild_only()
-    @is_game_running()
     async def game_join(self, ctx):
         """Join a game lobby!
         Only works if there's a lobby running on the server."""
+        is_game_running(self.bot)
+
         _game = self.games[ctx.guild.id]
 
         if ctx.author.id not in _game["player_ids"]:
@@ -157,10 +162,11 @@ class Game(commands.Cog, name="Game", command_attrs=dict(case_insensitive=True))
 
     @game.command(name="leave", aliases=["l"])
     @commands.guild_only()
-    @is_game_running()
     async def game_leave(self, ctx):
         """Leave a game lobby!
         Only works if there's a lobby running on the server and you're in it."""
+        is_game_running(self.bot)
+
         _game = self.games[ctx.guild.id]
 
         if ctx.author.id in _game["player_ids"]:
@@ -299,7 +305,6 @@ class Game(commands.Cog, name="Game", command_attrs=dict(case_insensitive=True))
 
     @game.command(name="configure", aliases=["config", "c"])
     @commands.guild_only()
-    @is_game_running()
     async def configure(
         self,
         ctx,
@@ -316,7 +321,10 @@ class Game(commands.Cog, name="Game", command_attrs=dict(case_insensitive=True))
             [impostors|imps|imp|i] <amount>: Set the number of impostors to <amount>.
             [tasks|t] <long|short|common> <amount>: Set the amount of <task_type> tasks to <amount>.
             [sabotageperms|sabperms|sp] <yes/y/true|no/n/false> [specific_perm_1] [specific_perm_2]: Sets the value of [specific_perm]s (or all perm edits, if not specified) to True or False, depending on the other argument."""
+        is_game_running(self.bot)
+
         _game = self.games[ctx.guild.id]
+
         if option is None:
             desc_text = """Host: **{0.name}#{0.discriminator}**
 Number of Impostors: **{1}**
@@ -470,9 +478,10 @@ Common: **{2}**""".format(
 
     @game.command(name="listplayers", aliases=["listp", "lp"])
     @commands.guild_only()
-    @is_game_running()
     async def list_players(self, ctx):
         "List all players in a lobby!"
+        is_game_running(self.bot)
+
         _game = self.games[ctx.guild.id]
         msg = "**Players in lobby:**\n"
 

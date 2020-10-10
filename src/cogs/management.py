@@ -1,4 +1,4 @@
-'''
+"""
     Among Us Discord Bot - Management cog file.
     Copyright (C) 2020  Jason Rutz
 
@@ -14,7 +14,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-'''
+"""
 
 import discord, shutil
 from discord.ext import commands
@@ -89,8 +89,7 @@ class Management(commands.Cog, name="Management", command_attrs=dict(case_insens
         else:
             self.bot.bot_prefixes["guild"][_id] = prefix
 
-        with open("prefixes.yml", "w") as prefix_file:
-            prefix_file.write(yaml.dump(self.bot.bot_prefixes, Dumper=yaml.CDumper))
+        dump_yaml(self.bot.bot_prefixes, "prefixes.yml")
 
         shutil.copy2("prefixes.yml", "drive/My Drive/bot_files/among_us_bot/prefixes.yml")
 
@@ -116,8 +115,7 @@ class Management(commands.Cog, name="Management", command_attrs=dict(case_insens
             else:
                 self.bot.bot_prefixes["user"][ctx.message.author.id] = prefix
 
-            with open("prefixes.yml", "w") as prefix_file:
-                prefix_file.write(yaml.dump(self.bot.bot_prefixes, Dumper=yaml.CDumper))
+            dump_yaml(self.bot.bot_prefixes, "prefixes.yml")
 
             shutil.copy2(
                 "prefixes.yml",
@@ -135,5 +133,6 @@ class Management(commands.Cog, name="Management", command_attrs=dict(case_insens
     async def ignore_channels(self, ctx, channel: discord.TextChannel):
         pass
 
+
 def setup(bot):
-  bot.add_cog(Management(bot))
+    bot.add_cog(Management(bot))
