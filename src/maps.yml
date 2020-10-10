@@ -1,0 +1,82 @@
+Mira HQ:
+  Admin:
+  - [Intersection, Office, Greenhouse]
+  - [Intersection, Office, Greenhouse]
+  - null
+  - locations
+  Balcony:
+  - [Cafeteria]
+  - null
+  - null
+  - null
+  Cafeteria:
+  - [Intersection, Storage, Balcony]
+  - null
+  - null
+  - null
+  Communications:
+  - [Hallway 2, MedBay, Locker Room]
+  - null
+  - Comms
+  - doorlog
+  Decontamination:
+  - [Locker Room, Laboratory, Reactor]
+  - [Locker Room, Reactor, Laboratory]
+  - null
+  - null
+  Greenhouse:
+  - [Intersection, Office, Admin]
+  - [Office, Admin]
+  - O2
+  - null
+  Hallway 1:
+  - [Launchpad, Hallway 2, MedBay]
+  - null
+  - O2
+  - null
+  Hallway 2:
+  - [MedBay, Locker Room, Communications, Intersection]
+  - null
+  - null
+  - null
+  Intersection:
+  - [Hallway 2, Office, Greenhouse, Admin, Cafeteria]
+  - [Admin, Balcony]
+  - null
+  - null
+  Laboratory:
+  - [Decontamination, Reactor]
+  - [Decontamination, Reactor, Office]
+  - null
+  - null
+  Launchpad:
+  - [Hallway 1]
+  - [Locker Room, Reactor]
+  - null
+  - null
+  - true
+  Locker Room:
+  - [Hallway 2, Decontamination, MedBay, Communications]
+  - [Launchpad, Decontamination, MedBay]
+  - null
+  - null
+  MedBay:
+  - [Hallway 2, Hallway 1, Communications, Locker Room]
+  - [Locker Room, Balcony]
+  - null
+  - null
+  Office:
+  - [Intersection, Greenhouse, Admin]
+  - [Laboratory, Greenhouse, Admin]
+  - Comms
+  - null
+  Reactor:
+  - [Decontamination, Laboratory]
+  - [Launchpad, Decontamination, Laboratory]
+  - Reactor
+  - null
+  Storage:
+  - [Cafeteria]
+  - null
+  - null
+  - null

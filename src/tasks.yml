@@ -1,0 +1,129 @@
+Mira HQ:
+  common:
+    Enter ID Code:
+    - [Admin]
+    - 1
+    - false
+    - id_code
+    Fix Wiring:
+    - [Greenhouse, Hallway 2, Laboratory, Locker Room, Storage]
+    - 3
+    - false
+    - wires
+  long:
+    Clear Asteroids:
+    - [Balcony]
+    - 1
+    - false
+    - asteroids
+    Start Reactor:
+    - [Reactor]
+    - 1
+    - false
+    - start_reactor
+    Submit Scan:
+    - [MedBay]
+    - 1
+    - false
+    - scan
+    Water Plants:
+    - [Storage, Greenhouse]
+    - 2
+    - true
+    - plants
+  short:
+    Assemble Artifact:
+    - [Laboratory]
+    - 1
+    - false
+    - artifact
+    Buy Beverage:
+    - [Cafeteria]
+    - 1
+    - false
+    - beverage
+    Chart Course:
+    - [Admin]
+    - 1
+    - false
+    - chart_course
+    Clean O2 Filter:
+    - [Greenhouse]
+    - 1
+    - false
+    - clean_o2
+    Divert Power to Admin:
+    - [Reactor, Admin]
+    - 2
+    - true
+    - divert_power
+    Divert Power to Cafeteria:
+    - [Reactor, Cafeteria]
+    - 2
+    - true
+    - divert_power
+    Divert Power to Communications:
+    - [Reactor, Communications]
+    - 2
+    - true
+    - divert_power
+    Divert Power to Greenhouse:
+    - [Reactor, Greenhouse]
+    - 2
+    - true
+    - divert_power
+    Divert Power to Laboratory:
+    - [Reactor, Laboratory]
+    - 2
+    - true
+    - divert_power
+    Divert Power to Launchpad:
+    - [Reactor, Launchpad]
+    - 2
+    - true
+    - divert_power
+    Divert Power to MedBay:
+    - [Reactor, MedBay]
+    - 2
+    - true
+    - divert_power
+    Divert Power to Office:
+    - [Reactor, Office]
+    - 2
+    - true
+    - divert_power
+    Fuel Engines:
+    - [Launchpad]
+    - 1
+    - false
+    - fuel
+    Measure Weather:
+    - [Balcony]
+    - 1
+    - false
+    - weather
+    Prime Shields:
+    - [Admin]
+    - 1
+    - false
+    - shields
+    Process Data:
+    - [Office]
+    - 1
+    - false
+    - process
+    Run Diagnostics:
+    - [Launchpad]
+    - 1
+    - false
+    - diags
+    Sort Samples:
+    - [Laboratory]
+    - 1
+    - false
+    - samples
+    Unlock Manifolds:
+    - [Reactor]
+    - 1
+    - false
+    - manifolds
