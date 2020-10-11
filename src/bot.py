@@ -137,6 +137,8 @@ for cog in ["game", "owner", "fun", "management", "misc"]:
 async def reload(ctx, ext: str):
     bot.reload_extension(ext)
 
-
-# Run the bot
-bot.run("TOKEN")
+if __name__ == "__main__":
+    try:
+        bot.run("TOKEN")
+    except discord.errors.LoginFailure:
+        print("Please edit the bot file to add your bot's login token!")
