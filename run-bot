@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Enter source directory
+cd ./src
+
+# Make the bot file executable
+sudo chmod +x bot.py
+
+# Run the bot
+./bot.py
